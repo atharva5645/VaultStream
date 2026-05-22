@@ -66,13 +66,13 @@ const AnimatedRoutes = ({ isAuthenticated, role, getDashboardPath }) => {
           <Route element={<RoleGuard allowedRoles={['editor', 'admin']} />}>
             <Route path="/editor" element={<EditorLayout />}>
               <Route path="dashboard" element={<EditorDashboard />} />
-              <Route path="tenant" element={<TenantDashboard />} />
-              <Route path="team" element={<TeamMembers />} />
-              <Route path="invites" element={<InviteMembers />} />
-              <Route path="workspace-settings" element={<WorkspaceSettings />} />
+              {/* <Route path="tenant" element={<TenantDashboard />} /> */}
+              {/* <Route path="team" element={<TeamMembers />} /> */}
+              {/* <Route path="invites" element={<InviteMembers />} /> */}
+              {/* <Route path="workspace-settings" element={<WorkspaceSettings />} /> */}
               <Route path="upload" element={<UploadVideo />} />
               <Route path="library" element={<Library />} />
-              <Route path="analytics" element={<VideoAnalytics />} />
+              {/* <Route path="analytics" element={<VideoAnalytics />} /> */}
               <Route path="settings" element={<SystemSettings />} />
             </Route>
           </Route>
@@ -82,11 +82,11 @@ const AnimatedRoutes = ({ isAuthenticated, role, getDashboardPath }) => {
               <Route index element={<Navigate to="dashboard" replace />} />
               <Route path="dashboard" element={<AdminDashboard />} />
               <Route path="users" element={<ManageUsers />} />
-              <Route path="tenants" element={<ManageTenants />} />
+              {/* <Route path="tenants" element={<ManageTenants />} /> */}
               <Route path="moderation" element={<Moderation />} />
-              <Route path="analytics" element={<AnalyticsDashboard />} />
-              <Route path="processing" element={<ProcessingDashboard />} />
-              <Route path="settings" element={<AdminSystemSettings />} />
+              {/* <Route path="analytics" element={<AnalyticsDashboard />} /> */}
+              {/* <Route path="processing" element={<ProcessingDashboard />} /> */}
+              {/* <Route path="settings" element={<AdminSystemSettings />} /> */}
             </Route>
           </Route>
         </Route>

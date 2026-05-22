@@ -28,7 +28,8 @@ const formatEta = (secondsRemaining) => {
 const uploadClient = axios.create({
   adapter: (config) =>
     new Promise((resolve, reject) => {
-      const file = config.data?.file;
+      const isFormData = config.data instanceof FormData;
+      const file = isFormData ? config.data.get('file') : config.data?.file;
       const totalBytes = file?.size ?? 0;
       const startedAt = performance.now();
       let loadedBytes = 0;
@@ -233,10 +234,14 @@ export const useUploadQueue = () => {
 
     const startTime = performance.now();
 
+    const formData = new FormData();
+    formData.append('file', nextQueuedItem.file);
+    formData.append('title', nextQueuedItem.title || '');
+
     uploadClient
       .post(
         MOCK_UPLOAD_ENDPOINT,
-        { file: nextQueuedItem.file, title: nextQueuedItem.title },
+        formData,
         {
           signal: controller.signal,
           onUploadProgress: (event) => {

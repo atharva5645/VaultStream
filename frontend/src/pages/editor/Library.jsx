@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { AlertTriangle, CheckCircle2, Clock, Film, MoreVertical, Play, SlidersHorizontal, X } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Clock, Film, MoreVertical, Play, SlidersHorizontal, X, Trash2 } from 'lucide-react';
 import BackButton from '../../components/common/BackButton';
 import { useTenant } from '../../context/TenantContext';
 import { formatBytes, formatDuration } from '../../hooks/useVideoValidation';
@@ -33,8 +33,25 @@ const Library = () => {
   const [videos, setVideos] = useState([]);
   const [playingVideo, setPlayingVideo] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [openMenuId, setOpenMenuId] = useState(null);
+  const [videoToDelete, setVideoToDelete] = useState(null);
   const { currentTenant } = useTenant();
   const { notifyWarning } = useNotifications();
+
+  const handleDeleteClick = (e, id) => {
+    e.stopPropagation();
+    setVideoToDelete(id);
+    setOpenMenuId(null);
+  };
+
+  const confirmDelete = () => {
+    if (!videoToDelete) return;
+    const stored = JSON.parse(localStorage.getItem('mockVideos') || '[]');
+    const newStored = stored.filter((v) => v.id !== videoToDelete && v.libraryId !== videoToDelete);
+    localStorage.setItem('mockVideos', JSON.stringify(newStored));
+    setVideos((prev) => prev.filter((v) => v.id !== videoToDelete && v.libraryId !== videoToDelete));
+    setVideoToDelete(null);
+  };
 
   useEffect(() => {
     let stored = JSON.parse(localStorage.getItem('mockVideos') || '[]');
@@ -159,6 +176,36 @@ const Library = () => {
         </div>
       ) : null}
 
+      {videoToDelete ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+          <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl border border-gray-100">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-red-100">
+                <AlertTriangle className="h-5 w-5 text-red-600" aria-hidden="true" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-900">Delete Video</h3>
+            </div>
+            <p className="mt-2 text-sm text-gray-500">
+              Are you sure you want to delete this video? This action cannot be undone and it will be permanently removed from your library.
+            </p>
+            <div className="mt-6 flex justify-end gap-3">
+              <button 
+                className="rounded-xl px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors"
+                onClick={() => setVideoToDelete(null)}
+              >
+                Cancel
+              </button>
+              <button 
+                className="rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 transition-colors shadow-sm"
+                onClick={confirmDelete}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       <div className="flex items-center justify-between text-sm text-slate-500">
         <span>{filteredVideos.length} results</span>
         <span>{savedFilters.length} saved filters</span>
@@ -213,9 +260,30 @@ const Library = () => {
                   <h3 className="line-clamp-1 font-semibold text-gray-900" title={video.title}>
                     {video.title}
                   </h3>
-                  <button type="button" className="text-gray-400 hover:text-gray-600">
-                    <MoreVertical size={18} />
-                  </button>
+                  <div className="relative">
+                    <button 
+                      type="button" 
+                      className="text-gray-400 hover:text-gray-600 p-1"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setOpenMenuId(openMenuId === video.id ? null : video.id);
+                      }}
+                    >
+                      <MoreVertical size={18} />
+                    </button>
+                    {openMenuId === video.id && (
+                      <div className="absolute right-0 top-full mt-1 w-32 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 z-10 overflow-hidden">
+                        <button
+                          type="button"
+                          className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 text-left"
+                          onClick={(e) => handleDeleteClick(e, video.id)}
+                        >
+                          <Trash2 size={16} />
+                          Delete
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500">
                   <span>{formatBytes(video.size)}</span>
